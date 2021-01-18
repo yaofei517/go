@@ -10,21 +10,19 @@ import (
 	"unsafe"
 )
 
-// A WaitGroup waits for a collection of goroutines to finish.
-// The main goroutine calls Add to set the number of
-// goroutines to wait for. Then each of the goroutines
-// runs and calls Done when finished. At the same time,
-// Wait can be used to block until all goroutines have finished.
+// WaitGroup 用来等待一组 goroutines 的结束，.
+// 主goroutine 调用 Add 方法去设置一共需要等待的数量
+// 每个被等待的 goroutine 在执行完毕的时候需要执行 Done 方法来表示完成
+// 同时,调用 Wait 方法可以阻塞主 goroutine 直到所有的 goroutine 完成
 //
-// A WaitGroup must not be copied after first use.
+// WaitGroup 在使用后不允许拷贝.
 type WaitGroup struct {
 	noCopy noCopy
 
-	// 64-bit value: high 32 bits are counter, low 32 bits are waiter count.
-	// 64-bit atomic operations require 64-bit alignment, but 32-bit
-	// compilers do not ensure it. So we allocate 12 bytes and then use
-	// the aligned 8 bytes in them as state, and the other 4 as storage
-	// for the sema.
+	// 64-bit 的值分成两段: 高 32 bits 是用来计数的, 低 32 bits 是 waiter 的值.
+	// 64-bit 的原子操作需要 64bit 对齐,
+	// 但是 32-bit 不需要对齐.
+	// 因此我们分配了 12 个 byte ，用其中对齐的 8 个 byte 存储状态，剩余的 4 个保存信号量
 	state1 [3]uint32
 }
 
@@ -37,19 +35,15 @@ func (wg *WaitGroup) state() (statep *uint64, semap *uint32) {
 	}
 }
 
-// Add adds delta, which may be negative, to the WaitGroup counter.
-// If the counter becomes zero, all goroutines blocked on Wait are released.
-// If the counter goes negative, Add panics.
+// Add 用来控制等待的所有的 goroutine 的数量，可以使用负数来减少等待的数量.
+// 当 counter 为 0 时，那么 Wait 方法会继续执行.
+// 如果 counter 是负数，Add 会直接 panic.
 //
-// Note that calls with a positive delta that occur when the counter is zero
-// must happen before a Wait. Calls with a negative delta, or calls with a
-// positive delta that start when the counter is greater than zero, may happen
-// at any time.
-// Typically this means the calls to Add should execute before the statement
-// creating the goroutine or other event to be waited for.
-// If a WaitGroup is reused to wait for several independent sets of events,
-// new Add calls must happen after all previous Wait calls have returned.
-// See the WaitGroup example.
+// 是调用 Wait 方式之前，必须先调用 Add 方法设置需要等待的数量，并且不能为负数
+// 在 counter 大于 0 时，可以 Add 任意的值，正数或负数
+// 通常来说调用 Add 方法应该在创建 goroutine 之前.
+// 如果要重用 WaitGroup，那么必须单独等待每一组全部完成后，Wait 响应之后
+// 重新调用 Add 方法.
 func (wg *WaitGroup) Add(delta int) {
 	statep, semap := wg.state()
 	if race.Enabled {
@@ -94,12 +88,12 @@ func (wg *WaitGroup) Add(delta int) {
 	}
 }
 
-// Done decrements the WaitGroup counter by one.
+// Done 减少 1 个等待的counter.
 func (wg *WaitGroup) Done() {
 	wg.Add(-1)
 }
 
-// Wait blocks until the WaitGroup counter is zero.
+// Wait 阻塞当前 goroutine 直到等待的 WaitGroup的 counter 的值 为 0
 func (wg *WaitGroup) Wait() {
 	statep, semap := wg.state()
 	if race.Enabled {

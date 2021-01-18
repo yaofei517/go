@@ -8,23 +8,23 @@ import (
 	"unsafe"
 )
 
-// A Value provides an atomic load and store of a consistently typed value.
-// The zero value for a Value returns nil from Load.
-// Once Store has been called, a Value must not be copied.
+// Value 可以原子的存储或加载类型的 value.
+// Value 的零值是 nil.
+// 一旦使用 store 保存后, 这个 Value 不允许再次复制.
 //
-// A Value must not be copied after first use.
+// Value 在第一次使用后禁止复制.
 type Value struct {
 	v interface{}
 }
 
-// ifaceWords is interface{} internal representation.
+// ifaceWords 是 interface{} 的内部表示，包内用的.
 type ifaceWords struct {
 	typ  unsafe.Pointer
 	data unsafe.Pointer
 }
 
-// Load returns the value set by the most recent Store.
-// It returns nil if there has been no call to Store for this Value.
+// Load 返回最近一次保存的值.
+// 如果没有值会返回 nil.
 func (v *Value) Load() (x interface{}) {
 	vp := (*ifaceWords)(unsafe.Pointer(v))
 	typ := LoadPointer(&vp.typ)
@@ -39,9 +39,9 @@ func (v *Value) Load() (x interface{}) {
 	return
 }
 
-// Store sets the value of the Value to x.
-// All calls to Store for a given Value must use values of the same concrete type.
-// Store of an inconsistent type panics, as does Store(nil).
+// Store 保存 x 到Value中.
+// Store 到 value 中的值必须是相同的类型.
+// Store 不同的类型或者 nil 会导致 panic.
 func (v *Value) Store(x interface{}) {
 	if x == nil {
 		panic("sync/atomic: store of nil value into Value")
@@ -81,6 +81,6 @@ func (v *Value) Store(x interface{}) {
 	}
 }
 
-// Disable/enable preemption, implemented in runtime.
+// 禁止/启用 抢占, 在 runtime 中实现的.
 func runtime_procPin()
 func runtime_procUnpin()
