@@ -1,37 +1,33 @@
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// 版权所有2009 The Go Authors。版权所有。
+// 此源代码的使用受 BSD 风格许可约束，可以在LICENSE文件中找到该许可证。
 
 /*
-	Package fmt implements formatted I/O with functions analogous
-	to C's printf and scanf.  The format 'verbs' are derived from C's but
-	are simpler.
+    fmt包实现格式化 I/O 功能类似C的printf和scanf函数。格式化符号也是从C派生的，但是更简单。
 
+	输出
 
-	Printing
+	格式化符号：
 
-	The verbs:
+	通用：
+		%v	按值的默认输出格式输出
+		%+v	在 %v 基础上，对结构体字段名和值进行展开
+		%#v	输出 Go 语言语法格式的值
+		%T	输出 Go 语言语法格式的类型和值
+		%%	输出 % 本体
 
-	General:
-		%v	the value in a default format
-			when printing structs, the plus flag (%+v) adds field names
-		%#v	a Go-syntax representation of the value
-		%T	a Go-syntax representation of the type of the value
-		%%	a literal percent sign; consumes no value
-
-	Boolean:
-		%t	the word true or false
-	Integer:
-		%b	base 2
-		%c	the character represented by the corresponding Unicode code point
-		%d	base 10
-		%o	base 8
-		%O	base 8 with 0o prefix
-		%q	a single-quoted character literal safely escaped with Go syntax.
-		%x	base 16, with lower-case letters for a-f
-		%X	base 16, with upper-case letters for A-F
-		%U	Unicode format: U+1234; same as "U+%04X"
-	Floating-point and complex constituents:
+	布尔型：
+		%t	输出 true 或者 false
+	整型：
+		%b	以二进制方式显示
+		%c	以字节的 Unicode 方式显示
+		%d	以十进制方式显示
+		%o	以八进制方式显示
+		%O	以前缀 0o + 八进制方式显示
+		%q	使用Go语法安全地转义的单引号字符文字
+		%x	以十六进制、字母小写方式显示
+		%X	以十六进制、字母大写方式显示
+		%U	Unicode 字符，格式为：U+1234; 等价于 "U+%04X"
+	浮点数和复数类型：
 		%b	decimalless scientific notation with exponent a power of two,
 			in the manner of strconv.FormatFloat with the 'b' format,
 			e.g. -123456p-78
